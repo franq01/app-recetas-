@@ -1,47 +1,41 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Typography, TextField, Box } from '@mui/material';
-import useSound from 'use-sound'; 
-import '../App.css'; 
-
+import { AppBar, Toolbar, Button, Typography, TextField, Box, IconButton } from '@mui/material';
+import { Favorite } from '@mui/icons-material';
+import useSound from 'use-sound';
+import { useNavigate } from 'react-router-dom';
+import { auth } from '../context/firebaseConfig'; 
 
 const StyledTextField = {
   marginBottom: '20px',
   width: '200px',
   '& input': {
     textAlign: 'center',
-    fontSize: '24px',    
+    fontSize: '24px',
   }
 };
 
-
 const Timer = () => {
-  const [inputTime, setInputTime] = useState(''); 
-  const [seconds, setSeconds] = useState(0); 
-  const [isActive, setIsActive] = useState(false); 
-  const [isAlarmPlaying, setIsAlarmPlaying] = useState(false); 
+  const [inputTime, setInputTime] = useState('');
+  const [seconds, setSeconds] = useState(0);
+  const [isActive, setIsActive] = useState(false);
+  const [isAlarmPlaying, setIsAlarmPlaying] = useState(false);
+  const [play, { stop, error }] = useSound('/alarma.mp3', { volume: 1, interrupt: true });
+  const navigate = useNavigate();
 
-  
-  const [play, { stop, error }] = useSound('/alarma.mp3', {
-    volume: 1, 
-    interrupt: true 
-  });
-
-  
   useEffect(() => {
     let timer;
     if (isActive && seconds > 0) {
       timer = setInterval(() => {
-        setSeconds((seconds) => seconds - 1);
+        setSeconds((prevSeconds) => prevSeconds - 1);
       }, 1000);
     } else if (seconds === 0 && isActive) {
-      play();  
-      setIsActive(false); 
+      play();
+      setIsActive(false);
       setIsAlarmPlaying(true);
     }
     return () => clearInterval(timer);
   }, [isActive, seconds, play]);
 
-  
   useEffect(() => {
     if (error) {
       console.error("Error al cargar el sonido:", error);
@@ -49,90 +43,105 @@ const Timer = () => {
     }
   }, [error]);
 
-  
-  const handleInputChange = (event) => {
-    setInputTime(event.target.value);
-  };
+  const handleInputChange = (event) => setInputTime(event.target.value);
 
-  
   const startTimer = () => {
     const timeInSeconds = parseInt(inputTime) * 60;
     if (!isNaN(timeInSeconds) && timeInSeconds > 0) {
       setSeconds(timeInSeconds);
       setIsActive(true);
-      setIsAlarmPlaying(false); 
+      setIsAlarmPlaying(false);
     } else {
       alert("Por favor, ingresa un tiempo válido.");
     }
   };
 
-  
   const resetTimer = () => {
     setInputTime('');
     setSeconds(0);
     setIsActive(false);
-    setIsAlarmPlaying(false); 
+    setIsAlarmPlaying(false);
   };
 
- 
   const stopAlarm = () => {
-    stop(); 
-    setIsAlarmPlaying(false); 
+    stop();
+    setIsAlarmPlaying(false);
   };
+
+  const handleLogin = () => navigate('/login');
+  const handleFavorites = () => navigate('/favorites');
+  const handleHome = () => navigate('/home');
 
   return (
-    <Box display="flex" flexDirection="column" alignItems="center" marginTop="30px">
-      <Typography variant="h3" marginBottom="20px" color="primary">
-        Temporizador
-      </Typography>
+    <div>
+      {/* Navbar flotante */}
+      <AppBar position="fixed" sx={{ backgroundColor: '#FF5722' }}>
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>Recetas App</Typography>
+          <Button color="inherit" onClick={handleHome}>Inicio</Button>
+          <Button color="inherit" onClick={handleFavorites}>Favoritos</Button>
+          <IconButton color="inherit" onClick={() => navigate('/favorites')}>
+            <Favorite />
+          </IconButton>
+          {!auth.currentUser ? (
+            <Button color="inherit" onClick={handleLogin}>Iniciar Sesión</Button>
+          ) : (
+            <Typography variant="body1" sx={{ ml: 2 }}>Bienvenido, {auth.currentUser.displayName}</Typography>
+          )}
+        </Toolbar>
+      </AppBar>
 
-      {/* Campo para que el usuario ingrese el tiempo en minutos */}
-      <TextField
-        label="Tiempo en minutos"
-        variant="outlined"
-        value={inputTime}
-        onChange={handleInputChange}
-        disabled={isActive} 
-        sx={StyledTextField}
-      />
+      {/* Espaciado para evitar superposición */}
+      <Toolbar />
 
-      <Typography variant="h2" marginBottom="20px" color="secondary">
-        {`${Math.floor(seconds / 60)}:${seconds % 60 < 10 ? '0' : ''}${seconds % 60}`}
-      </Typography>
+      {/* Contenido del Timer */}
+      <Box display="flex" flexDirection="column" alignItems="center" marginTop="100px">
+        <Typography variant="h3" marginBottom="20px" color="primary">Temporizador</Typography>
 
-      {/* Botón para iniciar o pausar el temporizador */}
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={startTimer}
-        disabled={isActive || !inputTime} // Deshabilitar si ya está en marcha o no hay tiempo ingresado
-        style={{ marginBottom: '10px', width: '200px' }}
-      >
-        Iniciar
-      </Button>
+        <TextField
+          label="Tiempo en minutos"
+          variant="outlined"
+          value={inputTime}
+          onChange={handleInputChange}
+          disabled={isActive}
+          sx={StyledTextField}
+        />
 
-      {/* Botón para reiniciar */}
-      <Button
-        variant="outlined"
-        color="secondary"
-        onClick={resetTimer}
-        style={{ width: '200px' }}
-      >
-        Reiniciar
-      </Button>
+        <Typography variant="h2" marginBottom="20px" color="secondary">
+          {`${Math.floor(seconds / 60)}:${seconds % 60 < 10 ? '0' : ''}${seconds % 60}`}
+        </Typography>
 
-      {/* Botón para detener la alarma */}
-      {isAlarmPlaying && (
         <Button
           variant="contained"
-          color="error"
-          onClick={stopAlarm}
-          style={{ marginTop: '10px', width: '200px' }}
+          color="primary"
+          onClick={startTimer}
+          disabled={isActive || !inputTime}
+          style={{ marginBottom: '10px', width: '200px' }}
         >
-          Detener Alarma
+          Iniciar
         </Button>
-      )}
-    </Box>
+
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={resetTimer}
+          style={{ width: '200px' }}
+        >
+          Reiniciar
+        </Button>
+
+        {isAlarmPlaying && (
+          <Button
+            variant="contained"
+            color="error"
+            onClick={stopAlarm}
+            style={{ marginTop: '10px', width: '200px' }}
+          >
+            Detener Alarma
+          </Button>
+        )}
+      </Box>
+    </div>
   );
 };
 

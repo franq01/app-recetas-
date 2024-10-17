@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { auth, db } from '../context/firebaseConfig'; // Importar Firestore
 import { useNavigate } from 'react-router-dom';
-import { Button, TextField, Typography, Container, Box, Alert } from '@mui/material';
+import { AppBar, Toolbar,Button, TextField, Typography, Container, Box, Alert } from '@mui/material';
 import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
@@ -44,7 +44,21 @@ const Login = () => {
   };
 
   return (
-    <Container maxWidth="sm">
+
+   <Box>
+     
+      {/* AppBar flotante */}
+      <AppBar position="fixed" sx={{ backgroundColor: '#FF5722' }}>
+        <Toolbar>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            Recetas App
+          </Typography>
+          <Button color="inherit" onClick={() => navigate('/')}>
+            Home
+          </Button>
+        </Toolbar>
+      </AppBar>
+     <Container maxWidth="sm"sx={{ mt: 10 }}>
       <Box sx={{ mt: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Typography variant="h4" gutterBottom>
           Iniciar Sesión
@@ -75,10 +89,10 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
+          <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2, backgroundColor: '#FF5722' }}>
             Iniciar Sesión
           </Button>
-          <Button variant="outlined" color="primary" onClick={handleGoogleLogin} fullWidth sx={{ mt: 2 }}>
+          <Button variant="contained" color="primary" onClick={handleGoogleLogin} fullWidth sx={{ mt: 2, backgroundColor: '#FF5722' }}>
             Iniciar Sesión con Google
           </Button>
         </form>
@@ -91,6 +105,7 @@ const Login = () => {
         </Typography>
       </Box>
     </Container>
+   </Box>
   );
 };
 
