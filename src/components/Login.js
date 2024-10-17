@@ -1,6 +1,6 @@
 // src/components/Login.js
 import React, { useState } from 'react';
-import { auth, db } from '../context/firebaseConfig'; // Importar Firestore
+import { auth, db } from '../context/firebaseConfig'; 
 import { useNavigate } from 'react-router-dom';
 import { AppBar, Toolbar,Button, TextField, Typography, Container, Box, Alert } from '@mui/material';
 import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';

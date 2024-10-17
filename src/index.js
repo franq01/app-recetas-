@@ -25,7 +25,7 @@ if ('serviceWorker' in navigator) {
           if (installingWorker.state === 'installed') {
             if (navigator.serviceWorker.controller) {
               console.log('Nueva versión disponible. Recarga la página para actualizar.');
-              // Aquí podrías mostrar una notificación o dar al usuario la opción de actualizar
+              
             } else {
               console.log('El contenido se ha cacheado para uso sin conexión.');
             }
