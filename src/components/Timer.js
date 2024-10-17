@@ -1,79 +1,138 @@
-// src/components/Timer.js
 import React, { useState, useEffect } from 'react';
-import { Button, Typography, Container, Box } from '@mui/material';
+import { Button, Typography, TextField, Box } from '@mui/material';
+import useSound from 'use-sound'; 
+import '../App.css'; 
+
+
+const StyledTextField = {
+  marginBottom: '20px',
+  width: '200px',
+  '& input': {
+    textAlign: 'center',
+    fontSize: '24px',    
+  }
+};
+
 
 const Timer = () => {
-  const [time, setTime] = useState(0); 
-  const [isActive, setIsActive] = useState(false);
-  const [isFinished, setIsFinished] = useState(false);
+  const [inputTime, setInputTime] = useState(''); 
+  const [seconds, setSeconds] = useState(0); 
+  const [isActive, setIsActive] = useState(false); 
+  const [isAlarmPlaying, setIsAlarmPlaying] = useState(false); 
 
-  // Para el sonido de la alarma
-  const alarmSound = new Audio('https://www.soundjay.com/button/beep-07.wav'); 
+  
+  const [play, { stop, error }] = useSound('/alarma.mp3', {
+    volume: 1, 
+    interrupt: true 
+  });
 
+  
   useEffect(() => {
-    let timer = null;
-
-    if (isActive) {
+    let timer;
+    if (isActive && seconds > 0) {
       timer = setInterval(() => {
-        setTime((prevTime) => {
-          if (prevTime <= 1) {
-            clearInterval(timer);
-            setIsActive(false);
-            setIsFinished(true);
-            alarmSound.play(); // Reproduce el sonido al terminar
-            return 0;
-          }
-          return prevTime - 1;
-        });
+        setSeconds((seconds) => seconds - 1);
       }, 1000);
+    } else if (seconds === 0 && isActive) {
+      play();  
+      setIsActive(false); 
+      setIsAlarmPlaying(true);
     }
-
     return () => clearInterval(timer);
-  }, [isActive]);
+  }, [isActive, seconds, play]);
 
-  const handleStart = () => {
-    setIsActive(true);
-    setIsFinished(false);
+  
+  useEffect(() => {
+    if (error) {
+      console.error("Error al cargar el sonido:", error);
+      alert("No se pudo reproducir el sonido. Por favor, verifica la ruta del archivo.");
+    }
+  }, [error]);
+
+  
+  const handleInputChange = (event) => {
+    setInputTime(event.target.value);
   };
 
-  const handleStop = () => {
-    setIsActive(false);
+  
+  const startTimer = () => {
+    const timeInSeconds = parseInt(inputTime) * 60;
+    if (!isNaN(timeInSeconds) && timeInSeconds > 0) {
+      setSeconds(timeInSeconds);
+      setIsActive(true);
+      setIsAlarmPlaying(false); 
+    } else {
+      alert("Por favor, ingresa un tiempo válido.");
+    }
   };
 
-  const handleReset = () => {
+  
+  const resetTimer = () => {
+    setInputTime('');
+    setSeconds(0);
     setIsActive(false);
-    setTime(0);
-    setIsFinished(false);
+    setIsAlarmPlaying(false); 
+  };
+
+ 
+  const stopAlarm = () => {
+    stop(); 
+    setIsAlarmPlaying(false); 
   };
 
   return (
-    <Container maxWidth="sm">
-      <Box sx={{ mt: 4, textAlign: 'center' }}>
-        <Typography variant="h4" gutterBottom>
-          Cronómetro
-        </Typography>
-        <Typography variant="h2" component="div" gutterBottom>
-          {isFinished ? '¡Tiempo!' : `${Math.floor(time / 60)}:${(time % 60).toString().padStart(2, '0')}`}
-        </Typography>
-        <Button variant="contained" color="primary" onClick={handleStart} disabled={isActive || isFinished}>
-          Iniciar
+    <Box display="flex" flexDirection="column" alignItems="center" marginTop="30px">
+      <Typography variant="h3" marginBottom="20px" color="primary">
+        Temporizador
+      </Typography>
+
+      {/* Campo para que el usuario ingrese el tiempo en minutos */}
+      <TextField
+        label="Tiempo en minutos"
+        variant="outlined"
+        value={inputTime}
+        onChange={handleInputChange}
+        disabled={isActive} 
+        sx={StyledTextField}
+      />
+
+      <Typography variant="h2" marginBottom="20px" color="secondary">
+        {`${Math.floor(seconds / 60)}:${seconds % 60 < 10 ? '0' : ''}${seconds % 60}`}
+      </Typography>
+
+      {/* Botón para iniciar o pausar el temporizador */}
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={startTimer}
+        disabled={isActive || !inputTime} // Deshabilitar si ya está en marcha o no hay tiempo ingresado
+        style={{ marginBottom: '10px', width: '200px' }}
+      >
+        Iniciar
+      </Button>
+
+      {/* Botón para reiniciar */}
+      <Button
+        variant="outlined"
+        color="secondary"
+        onClick={resetTimer}
+        style={{ width: '200px' }}
+      >
+        Reiniciar
+      </Button>
+
+      {/* Botón para detener la alarma */}
+      {isAlarmPlaying && (
+        <Button
+          variant="contained"
+          color="error"
+          onClick={stopAlarm}
+          style={{ marginTop: '10px', width: '200px' }}
+        >
+          Detener Alarma
         </Button>
-        <Button variant="contained" color="secondary" onClick={handleStop} disabled={!isActive}>
-          Detener
-        </Button>
-        <Button variant="contained" onClick={handleReset}>
-          Reiniciar
-        </Button>
-        <Box sx={{ mt: 2 }}>
-          <Button variant="outlined" onClick={() => setTime(time + 60)} disabled={isActive}>
-            +1 Minuto
-          </Button>
-          <Button variant="outlined" onClick={() => setTime(time + 300)} disabled={isActive} sx={{ ml: 1 }}>
-            +5 Minutos
-          </Button>
-        </Box>
-      </Box>
-    </Container>
+      )}
+    </Box>
   );
 };
 
