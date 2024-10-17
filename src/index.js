@@ -4,8 +4,6 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
-import { Workbox } from 'workbox-window';
-
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
@@ -13,19 +11,32 @@ root.render(
   </React.StrictMode>
 );
 
+// Registrar el Service Worker para PWA
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register('/service-worker.js')
-      .then(registration => {
-        console.log('ServiceWorker registrado con éxito: ', registration);
-      })
-      .catch(error => {
-        console.log('Error al registrar ServiceWorker: ', error);
-      });
+  window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register('/service-worker.js');
+      console.log('ServiceWorker registrado con éxito:', registration);
+
+      // Verificar si hay una actualización disponible
+      registration.onupdatefound = () => {
+        const installingWorker = registration.installing;
+        installingWorker.onstatechange = () => {
+          if (installingWorker.state === 'installed') {
+            if (navigator.serviceWorker.controller) {
+              console.log('Nueva versión disponible. Recarga la página para actualizar.');
+              // Aquí podrías mostrar una notificación o dar al usuario la opción de actualizar
+            } else {
+              console.log('El contenido se ha cacheado para uso sin conexión.');
+            }
+          }
+        };
+      };
+    } catch (error) {
+      console.error('Error al registrar el ServiceWorker:', error);
+    }
   });
 }
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+
+// Medición de rendimiento (opcional)
 reportWebVitals();

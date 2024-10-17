@@ -3,12 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { Button, Typography, Container, Box } from '@mui/material';
 
 const Timer = () => {
-  const [time, setTime] = useState(0); // Tiempo en segundos
+  const [time, setTime] = useState(0); 
   const [isActive, setIsActive] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
 
   // Para el sonido de la alarma
-  const alarmSound = new Audio('https://www.soundjay.com/button/beep-07.wav'); // falta corregir error de sonido de alarma 
+  const alarmSound = new Audio('https://www.soundjay.com/button/beep-07.wav'); 
 
   useEffect(() => {
     let timer = null;

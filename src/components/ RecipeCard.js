@@ -1,8 +1,8 @@
 import React from 'react';
 import { Card, CardContent, CardMedia, IconButton, Typography, CardActions, Button } from '@mui/material';
-import { Favorite, FavoriteBorder } from '@mui/icons-material'; 
+import { FavoriteBorder } from '@mui/icons-material'; 
 import { db, auth } from '../context/firebaseConfig';
-import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { doc, updateDoc, arrayUnion, getDoc, setDoc } from 'firebase/firestore'; 
 import { useNavigate } from 'react-router-dom'; 
 
 const RecipeCard = ({ recipe }) => {
@@ -13,18 +13,38 @@ const RecipeCard = ({ recipe }) => {
   };
 
   const handleAddToFavorites = async (e) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     const user = auth.currentUser;
+  
     if (user) {
-      const userDoc = doc(db, 'users', user.uid);
-      await updateDoc(userDoc, {
-        favorites: arrayUnion(recipe)
-      });
-      alert('Receta agregada a favoritos');
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+  
+        if (!userDoc.exists()) {
+          await setDoc(userDocRef, { favorites: [] });
+        }
+  
+        await updateDoc(userDocRef, {
+          favorites: arrayUnion(recipe)
+        });
+  
+        // Guardar en el almacenamiento local
+        const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+        favorites.push(recipe);
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+  
+        alert('Receta agregada a favoritos');
+      } catch (error) {
+        console.error('Error al agregar a favoritos:', error);
+        alert('Hubo un problema al agregar la receta a favoritos.');
+      }
     } else {
-      alert('Por favor inicia sesión para agregar a favoritos');
+      alert('Por favor inicia sesión para agregar a favoritos.');
     }
   };
+  
+  
 
   return (
     <Card sx={{ maxWidth: 345, marginBottom: 2 }} onClick={handleCardClick}>
