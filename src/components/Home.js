@@ -15,7 +15,7 @@ const Home = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
 
-  const apiKey = '0a959868b08f4afa952c894371f1899e';
+  const apiKey = '06f07715f2d840f6bc2545607431a95a';
 
   const handleLogin = () => navigate('/login');
   const handleTimer = () => navigate('/timer');
@@ -119,7 +119,7 @@ const Home = () => {
       <Toolbar />
 
       {/* Contenedor principal */}
-      <Container sx={{ marginTop: 4 }}>
+      <Container sx={{ padding: '20px',  maxWidth: '800px', margin: 'auto'}}>
         <Typography variant="h4" gutterBottom>
           {language === 'en' ? 'Popular Recipes' : 'Recetas Populares'}
         </Typography>

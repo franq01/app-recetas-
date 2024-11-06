@@ -48,11 +48,11 @@ const Favorites = () => {
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Recetas App
           </Typography>
-          <Button color="inherit" onClick={handleHome}>Inicio</Button>
+          <Button color="inherit" onClick={() => navigate('/')}>
+            Home
+          </Button>
           <Button color="inherit" onClick={handleTimer}>Cronómetro</Button>
-          <IconButton color="inherit" onClick={() => navigate('/favorites')}>
-            <Favorite />
-          </IconButton>
+          
           {!auth.currentUser ? (
             <Button color="inherit" onClick={handleLogin}>
               Iniciar Sesión

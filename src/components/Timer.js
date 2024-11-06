@@ -78,7 +78,9 @@ const Timer = () => {
       <AppBar position="fixed" sx={{ backgroundColor: '#FF5722' }}>
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>Recetas App</Typography>
-          <Button color="inherit" onClick={handleHome}>Inicio</Button>
+          <Button color="inherit" onClick={() => navigate('/')}>
+            Home
+          </Button>
           <Button color="inherit" onClick={handleFavorites}>Favoritos</Button>
           <IconButton color="inherit" onClick={() => navigate('/favorites')}>
             <Favorite />
