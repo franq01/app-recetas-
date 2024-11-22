@@ -22,6 +22,7 @@ const Timer = () => {
   const [play, { stop, error }] = useSound('/alarma.mp3', { volume: 1, interrupt: true });
   const navigate = useNavigate();
 
+
   useEffect(() => {
     let timer;
     if (isActive && seconds > 0) {
@@ -82,9 +83,7 @@ const Timer = () => {
             Home
           </Button>
           <Button color="inherit" onClick={handleFavorites}>Favoritos</Button>
-          <IconButton color="inherit" onClick={() => navigate('/favorites')}>
-            <Favorite />
-          </IconButton>
+          
           {!auth.currentUser ? (
             <Button color="inherit" onClick={handleLogin}>Iniciar Sesión</Button>
           ) : (

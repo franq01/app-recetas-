@@ -1,9 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { AppBar, Box, Toolbar, Button, CircularProgress, IconButton, Drawer, List, ListItem, Typography } from '@mui/material';
+import {
+  AppBar,
+  Box,
+  Toolbar,
+  Button,
+  CircularProgress,
+  IconButton,
+  Drawer,
+  List,
+  ListItem,
+  Typography,
+} from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Menu as MenuIcon } from '@mui/icons-material';
 import axios from 'axios';
-import { auth } from '../context/firebaseConfig';
+import { auth, db } from '../context/firebaseConfig';
+import { doc, setDoc, arrayUnion } from 'firebase/firestore';
 import { translateText } from '../translateAPI';
 
 const RecipeDetails = () => {
@@ -44,16 +56,18 @@ const RecipeDetails = () => {
   useEffect(() => {
     const translateRecipeDetails = async () => {
       if (recipe) {
-        if (language === 'es') {
-          // Tradce titulo y recerta 
-          const titleTranslation = await translateText(recipe.title, 'es');
-          const instructionsTranslation = await translateText(recipe.instructions, 'es');
-          setTranslatedTitle(titleTranslation);
-          setTranslatedInstructions(instructionsTranslation);
-        } else {
-          // Si el idioma es inglés se queda en ese idioma
-          setTranslatedTitle(recipe.title);
-          setTranslatedInstructions(recipe.instructions);
+        try {
+          if (language === 'es') {
+            const titleTranslation = await translateText(recipe.title, 'es');
+            const instructionsTranslation = await translateText(recipe.instructions, 'es');
+            setTranslatedTitle(titleTranslation);
+            setTranslatedInstructions(instructionsTranslation);
+          } else {
+            setTranslatedTitle(recipe.title);
+            setTranslatedInstructions(recipe.instructions);
+          }
+        } catch (error) {
+          console.error('Error translating recipe:', error);
         }
       }
     };
@@ -70,29 +84,73 @@ const RecipeDetails = () => {
 
   const toggleDrawer = (open) => () => setDrawerOpen(open);
 
-  
+  const addToFavorites = async () => {
+    if (!auth.currentUser) {
+      alert('Please log in to add to favorites');
+      return;
+    }
+
+    try {
+      const userRef = doc(db, 'users', auth.currentUser.uid); // Usuario autenticado
+      await setDoc(userRef, {
+        favorites: arrayUnion(recipe), // Agregar la receta a los favoritos del usuario
+      }, { merge: true });
+
+      alert('Recipe added to favorites!');
+    } catch (error) {
+      console.error('Error adding to favorites:', error);
+      alert('Error adding recipe to favorites');
+    }
+  };
+
   const appBarHeight = 64;
 
   return (
-    <div style={{ backgroundColor: '#FFF3E0', minHeight: '100vh', paddingBottom: '20px' }}>
+    <div
+      style={{
+        backgroundColor: '#F0F0F0',
+        minHeight: '100vh',
+        paddingBottom: '20px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+      }}
+    >
       {/* NavBar */}
-      <AppBar position="fixed" sx={{ backgroundColor: '#FF5722', height: `${appBarHeight}px` }}>
+      <AppBar
+        position="fixed"
+        sx={{
+          backgroundColor: '#333',
+          height: `${appBarHeight}px`,
+          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+        }}
+      >
         <Toolbar sx={{ justifyContent: 'space-between' }}>
-          <Typography variant="h6" onClick={() => navigate('/')} sx={{ cursor: 'pointer' }}>
+          <Typography
+            variant="h6"
+            onClick={() => navigate('/')}
+            sx={{ cursor: 'pointer', color: '#FFF', fontWeight: 'bold' }}
+          >
             Recetas App
           </Typography>
           <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: '10px' }}>
-            <Button color="inherit" onClick={handleFavorites}>Favoritos</Button>
-            <Button color="inherit" onClick={handleTimer}>Cronómetro</Button>
-            <Button color="inherit" onClick={handleLanguageChange}>
+            <Button color="inherit" onClick={handleFavorites} sx={{ fontWeight: 'bold', color: '#FFF' }}>
+              Favoritos
+            </Button>
+            <Button color="inherit" onClick={handleTimer} sx={{ fontWeight: 'bold', color: '#FFF' }}>
+              Cronómetro
+            </Button>
+            <Button color="inherit" onClick={handleLanguageChange} sx={{ fontWeight: 'bold', color: '#FFF' }}>
               {language === 'en' ? 'Traducir a Español' : 'Switch to English'}
             </Button>
             {auth.currentUser ? (
-              <Typography variant="body1" sx={{ ml: 2 }}>
+              <Typography variant="body1" sx={{ ml: 2, fontWeight: 'bold', color: '#FFF' }}>
                 Bienvenido, {auth.currentUser.displayName}
               </Typography>
             ) : (
-              <Button color="inherit" onClick={handleLogin}>Iniciar Sesión</Button>
+              <Button color="inherit" onClick={handleLogin} sx={{ fontWeight: 'bold', color: '#FFF' }}>
+                Iniciar Sesión
+              </Button>
             )}
           </Box>
           <IconButton
@@ -106,37 +164,113 @@ const RecipeDetails = () => {
       </AppBar>
 
       <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
-        <List sx={{ width: 250 }}>
-          <ListItem button onClick={handleTimer}>Cronómetro</ListItem>
-          <ListItem button onClick={handleFavorites}>Favoritos</ListItem>
+        <List sx={{ width: 250, backgroundColor: '#F0F0F0' }}>
+          <ListItem button onClick={handleTimer}>
+            Cronómetro
+          </ListItem>
+          <ListItem button onClick={handleFavorites}>
+            Favoritos
+          </ListItem>
           <ListItem button onClick={handleLanguageChange}>
             {language === 'en' ? 'Traducir a Español' : 'Switch to English'}
           </ListItem>
           {!auth.currentUser ? (
-            <ListItem button onClick={handleLogin}>Iniciar Sesión</ListItem>
+            <ListItem button onClick={handleLogin}>
+              Iniciar Sesión
+            </ListItem>
           ) : (
-            <ListItem>Bienvenido, {auth.currentUser.displayName}</ListItem>
+            <ListItem>
+              Bienvenido, {auth.currentUser.displayName}
+            </ListItem>
           )}
         </List>
       </Drawer>
 
       {/* Contenido de receta */}
-      <div style={{ padding: '20px', paddingTop: `${appBarHeight + 32}px`, maxWidth: '800px', margin: 'auto' }}>
+      <div
+        style={{
+          padding: '20px',
+          paddingTop: `${appBarHeight + 32}px`,
+          maxWidth: '800px',
+          width: '100%',
+          margin: 'auto',
+          boxSizing: 'border-box',
+        }}
+      >
         {loading ? (
-          <CircularProgress />
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '50vh',
+            }}
+          >
+            <CircularProgress color="inherit" />
+          </Box>
         ) : recipe ? (
           <>
-            
-            <Typography variant="h4" sx={{ color: '#FF5722', marginBottom: '20px', marginTop: '40px' }}>
+            <Typography
+              variant="h4"
+              sx={{
+                color: '#333',
+                marginBottom: '20px',
+                marginTop: '40px',
+                textAlign: 'center',
+                fontWeight: 'bold',
+              }}
+            >
               {translatedTitle}
             </Typography>
-            <img src={recipe.image} alt={translatedTitle} style={{ width: '100%', maxHeight: '400px', objectFit: 'cover', borderRadius: '8px' }} />
-            <Typography variant="h5" sx={{ marginTop: '20px', color: '#FF5722' }}>Instrucciones</Typography>
-            <Typography sx={{ marginTop: '10px', lineHeight: 1.5 }}>{translatedInstructions}</Typography>
+            <img
+              src={recipe.image}
+              alt={translatedTitle}
+              style={{
+                width: '100%',
+                maxHeight: '400px',
+                objectFit: 'cover',
+                borderRadius: '8px',
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+              }}
+            />
+            <Typography
+              variant="h5"
+              sx={{ marginTop: '20px', color: '#333', fontWeight: 'bold' }}
+            >
+              Instrucciones
+            </Typography>
+            <Typography
+              sx={{ marginTop: '10px', lineHeight: 1.5, textAlign: 'justify', color: '#000' }}
+            >
+              {translatedInstructions || 'No se proporcionaron instrucciones.'}
+            </Typography>
+            <Box sx={{ marginTop: '20px' }}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={addToFavorites}
+                sx={{
+                  fontWeight: 'bold',
+                  backgroundColor: '#333',
+                  color: '#FFF',
+                  '&:hover': {
+                    backgroundColor: '#555',
+                  },
+                  padding: '10px 20px',
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                }}
+              >
+                Agregar a Favoritos
+              </Button>
+            </Box>
           </>
         ) : (
-          <Typography variant="h6" color="error">
-            No se encontró la receta.
+          <Typography
+            variant="h6"
+            color="error"
+            sx={{ textAlign: 'center', marginTop: '20px' }}
+          >
+            No se pudo cargar la receta.
           </Typography>
         )}
       </div>

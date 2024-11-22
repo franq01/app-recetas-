@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardMedia, IconButton, Typography, CardActions, Button } from '@mui/material';
+import {
+  Card,
+  CardContent,
+  CardMedia,
+  IconButton,
+  Typography,
+  CardActions,
+  Button,
+} from '@mui/material';
 import { FavoriteBorder } from '@mui/icons-material';
 import { db, auth } from '../context/firebaseConfig';
 import { doc, updateDoc, arrayUnion, getDoc, setDoc } from 'firebase/firestore';
@@ -15,19 +23,20 @@ const RecipeCard = ({ recipe, language }) => {
     const translateRecipe = async () => {
       if (language === 'es') {
         const title = await translateText(recipe.title, 'es');
-        const summary = recipe.summary 
-          ? await translateText(recipe.summary.substring(0, 100), 'es') 
+        const summary = recipe.summary
+          ? await translateText(recipe.summary.substring(0, 100), 'es')
           : 'Sin descripción disponible';
         setTranslatedTitle(title);
         setTranslatedSummary(summary + '...');
       } else {
         setTranslatedTitle(recipe.title);
-        setTranslatedSummary(recipe.summary?.substring(0, 100) + '...' || 'No description available.');
+        setTranslatedSummary(
+          recipe.summary?.substring(0, 100) + '...' || 'No description available.'
+        );
       }
     };
     translateRecipe();
   }, [language, recipe]);
-  
 
   const handleCardClick = () => {
     navigate(`/recipe/${recipe.id}`);
@@ -65,27 +74,89 @@ const RecipeCard = ({ recipe, language }) => {
   };
 
   return (
-    <Card sx={{ maxWidth: 345, marginBottom: 2 }} onClick={handleCardClick}>
+    <Card
+      sx={{
+        maxWidth: 345,
+        marginBottom: 2,
+        borderRadius: '12px',
+        boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
+        '&:hover': {
+          transform: 'scale(1.02)',
+          transition: 'transform 0.2s ease-in-out',
+        },
+      }}
+      onClick={handleCardClick}
+    >
       <CardMedia
         component="img"
         height="200"
         image={recipe.image}
         alt={translatedTitle}
-        sx={{ cursor: 'pointer' }}
+        sx={{
+          borderRadius: '12px 12px 0 0',
+          cursor: 'pointer',
+        }}
       />
-      <CardContent>
-        <Typography gutterBottom variant="h6" component="div">
+      <CardContent
+        sx={{
+          backgroundColor: '#f5f5f5',
+          textAlign: 'center',
+        }}
+      >
+        <Typography
+          gutterBottom
+          variant="h6"
+          component="div"
+          sx={{
+            fontWeight: 'bold',
+            color: '#000000',
+          }}
+        >
           {translatedTitle}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{
+            color: '#757575',
+          }}
+        >
           {translatedSummary}
         </Typography>
       </CardContent>
-      <CardActions>
-        <IconButton aria-label="add to favorites" onClick={handleAddToFavorites}>
+      <CardActions
+        sx={{
+          justifyContent: 'space-between',
+          backgroundColor: '#ffffff',
+          padding: '8px 16px',
+        }}
+      >
+        <IconButton
+          aria-label="add to favorites"
+          onClick={handleAddToFavorites}
+          sx={{
+            color: '#ff6f61',
+            '&:hover': {
+              color: '#e53935',
+            },
+          }}
+        >
           <FavoriteBorder />
         </IconButton>
-        <Button size="small" color="primary" onClick={handleCardClick}>
+        <Button
+          size="small"
+          sx={{
+            textTransform: 'none',
+            fontWeight: 'bold',
+            color: '#000000',
+            backgroundColor: '#e0e0e0',
+            borderRadius: '8px',
+            '&:hover': {
+              backgroundColor: '#d6d6d6',
+            },
+          }}
+          onClick={handleCardClick}
+        >
           Ver Detalles
         </Button>
       </CardActions>

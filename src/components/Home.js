@@ -1,11 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { AppBar,Box, Toolbar, Button, Container, Typography, Grid, CircularProgress, IconButton, TextField, Drawer, List, ListItem } from '@mui/material';
+import {
+  AppBar,
+  Box,
+  Toolbar,
+  Button,
+  Container,
+  Typography,
+  Grid,
+  CircularProgress,
+  IconButton,
+  TextField,
+  Drawer,
+  List,
+  ListItem,
+} from '@mui/material';
 import { Favorite, Menu as MenuIcon } from '@mui/icons-material';
-import RecipeCard from './ RecipeCard'; 
+import RecipeCard from './ RecipeCard';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../context/firebaseConfig';
-import { translateText } from '../translateAPI';
 
 const Home = () => {
   const [recipes, setRecipes] = useState([]);
@@ -40,7 +53,7 @@ const Home = () => {
     fetchRecipes();
   }, [searchTerm]);
 
-  const handleLanguageChange = async () => {
+  const handleLanguageChange = () => {
     const newLanguage = language === 'en' ? 'es' : 'en';
     setLanguage(newLanguage);
     localStorage.setItem('language', newLanguage);
@@ -51,76 +64,119 @@ const Home = () => {
 
   return (
     <div>
-   {/* NavBar */}
-<AppBar position="fixed" sx={{ backgroundColor: '#FF5722' }}>
-  <Toolbar sx={{ justifyContent: 'space-between' }}>
-    <Typography variant="h6" onClick={() => navigate('/')} sx={{ cursor: 'pointer' }}>
-      Recetas App
-    </Typography>
+      {/* NavBar */}
+      <AppBar
+        position="fixed"
+        sx={{
+          backgroundColor: '#ffffff',
+          boxShadow: 'none',
+          borderBottom: '1px solid #e0e0e0',
+        }}
+      >
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
+          <Typography
+            variant="h6"
+            onClick={() => navigate('/')}
+            sx={{ cursor: 'pointer', color: '#000000', fontWeight: 'bold' }}
+          >
+            Recetas App
+          </Typography>
 
-    {/* Buscador */}
-    <TextField
-      variant="outlined"
-      placeholder="Buscar recetas"
-      value={searchTerm}
-      onChange={handleSearchChange}
-      size="small"
-      sx={{ 
-        backgroundColor: '#FFF', 
-        borderRadius: '4px', 
-        flexGrow: 1,
-        maxWidth: '400px', 
-        marginRight: '10px' 
-      }}
-    />
+          {/* Buscador */}
+          <TextField
+            variant="outlined"
+            placeholder="Buscar recetas"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            size="small"
+            sx={{
+              backgroundColor: '#f5f5f5',
+              borderRadius: '8px',
+              flexGrow: 1,
+              maxWidth: '400px',
+              marginRight: '10px',
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: '#e0e0e0',
+                },
+                '&:hover fieldset': {
+                  borderColor: '#000000',
+                },
+              },
+            }}
+          />
 
-    <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: '10px' }}>
-      <Button color="inherit" onClick={handleFavorites}>Favoritos</Button>
-      <Button color="inherit" onClick={handleTimer}>Cronómetro</Button>
-      <Button color="inherit" onClick={handleLanguageChange}>
-        {language === 'en' ? 'Traducir a Español' : 'Switch to English'}
-      </Button>
-      {auth.currentUser ? (
-        <Typography variant="body1" sx={{ ml: 2 }}>
-          Bienvenido, {auth.currentUser.displayName}
-        </Typography>
-      ) : (
-        <Button color="inherit" onClick={handleLogin}>Iniciar Sesión</Button>
-      )}
-    </Box>
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: '10px' }}>
+            <Button
+              color="inherit"
+              onClick={handleFavorites}
+              sx={{ color: '#000000', textTransform: 'none', fontWeight: 'bold' }}
+            >
+              Favoritos
+            </Button>
+            <Button
+              color="inherit"
+              onClick={handleTimer}
+              sx={{ color: '#000000', textTransform: 'none', fontWeight: 'bold' }}
+            >
+              Cronómetro
+            </Button>
+            <Button
+              color="inherit"
+              onClick={handleLanguageChange}
+              sx={{ color: '#000000', textTransform: 'none', fontWeight: 'bold' }}
+            >
+              {language === 'en' ? 'Traducir a Español' : 'Switch to English'}
+            </Button>
+            {auth.currentUser ? (
+              <Typography variant="body1" sx={{ ml: 2, color: '#000000' }}>
+                Bienvenido, {auth.currentUser.displayName}
+              </Typography>
+            ) : (
+              <Button
+                color="inherit"
+                onClick={handleLogin}
+                sx={{ color: '#000000', textTransform: 'none', fontWeight: 'bold' }}
+              >
+                Iniciar Sesión
+              </Button>
+            )}
+          </Box>
 
-    <IconButton
-      color="inherit"
-      onClick={toggleDrawer(true)}
-      sx={{ display: { xs: 'block', md: 'none' } }}
-    >
-      <MenuIcon />
-    </IconButton>
-  </Toolbar>
-</AppBar>
+          <IconButton
+            color="inherit"
+            onClick={toggleDrawer(true)}
+            sx={{ display: { xs: 'block', md: 'none' }, color: '#000000' }}
+          >
+            <MenuIcon />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
 
-<Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
-  <List sx={{ width: 250 }}>
-    <ListItem button onClick={handleTimer}>Cronómetro</ListItem>
-    <ListItem button onClick={handleFavorites}>Favoritos</ListItem>
-    <ListItem button onClick={handleLanguageChange}>
-      {language === 'en' ? 'Traducir a Español' : 'Switch to English'}
-    </ListItem>
-    {!auth.currentUser ? (
-      <ListItem button onClick={handleLogin}>Iniciar Sesión</ListItem>
-    ) : (
-      <ListItem>Bienvenido, {auth.currentUser.displayName}</ListItem>
-    )}
-  </List>
-</Drawer>
-
-
+      <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
+        <List sx={{ width: 250 }}>
+          <ListItem button onClick={handleTimer}>Cronómetro</ListItem>
+          <ListItem button onClick={handleFavorites}>Favoritos</ListItem>
+          <ListItem button onClick={handleLanguageChange}>
+            {language === 'en' ? 'Traducir a Español' : 'Switch to English'}
+          </ListItem>
+          {!auth.currentUser ? (
+            <ListItem button onClick={handleLogin}>Iniciar Sesión</ListItem>
+          ) : (
+            <ListItem>Bienvenido, {auth.currentUser.displayName}</ListItem>
+          )}
+        </List>
+      </Drawer>
 
       <Toolbar />
 
       {/* Contenedor principal */}
-      <Container sx={{ padding: '20px',  maxWidth: '800px', margin: 'auto'}}>
-        <Typography variant="h4" gutterBottom>
+      <Container sx={{ padding: '20px', maxWidth: '800px', margin: 'auto' }}>
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{ color: '#000000', fontWeight: 'bold' }}
+        >
           {language === 'en' ? 'Popular Recipes' : 'Recetas Populares'}
         </Typography>
 
