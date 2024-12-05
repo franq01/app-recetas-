@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { AppBar, Toolbar, Button, Typography, TextField, Box, IconButton } from '@mui/material';
-import { Favorite } from '@mui/icons-material';
+import { AppBar, Toolbar, Button, Typography, TextField, Box } from '@mui/material';
 import useSound from 'use-sound';
 import { useNavigate } from 'react-router-dom';
-import { auth } from '../context/firebaseConfig'; 
+import { auth } from '../context/firebaseConfig';
 
 const StyledTextField = {
   marginBottom: '20px',
-  width: '200px',
+  width: '250px',  // Ajusté el tamaño del TextField
   '& input': {
     textAlign: 'center',
     fontSize: '24px',
@@ -21,7 +20,6 @@ const Timer = () => {
   const [isAlarmPlaying, setIsAlarmPlaying] = useState(false);
   const [play, { stop, error }] = useSound('/alarma.mp3', { volume: 1, interrupt: true });
   const navigate = useNavigate();
-
 
   useEffect(() => {
     let timer;
@@ -76,18 +74,16 @@ const Timer = () => {
   return (
     <div>
       {/* Navbar flotante */}
-      <AppBar position="fixed" sx={{ backgroundColor: '#FF5722' }}>
+      <AppBar position="fixed" sx={{ backgroundColor: 'black' }}>
         <Toolbar sx={{ justifyContent: 'space-between' }}>
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>Recetas App</Typography>
-          <Button color="inherit" onClick={() => navigate('/')}>
-            Home
-          </Button>
+          <Typography variant="h6" sx={{ flexGrow: 1, color: 'white' }}>Recetas App</Typography>
+          <Button color="inherit" onClick={() => navigate('/')}>Home</Button>
           <Button color="inherit" onClick={handleFavorites}>Favoritos</Button>
           
           {!auth.currentUser ? (
             <Button color="inherit" onClick={handleLogin}>Iniciar Sesión</Button>
           ) : (
-            <Typography variant="body1" sx={{ ml: 2 }}>Bienvenido, {auth.currentUser.displayName}</Typography>
+            <Typography variant="body1" sx={{ ml: 2, color: 'white' }}>Bienvenido, {auth.currentUser.displayName}</Typography>
           )}
         </Toolbar>
       </AppBar>
@@ -96,8 +92,8 @@ const Timer = () => {
       <Toolbar />
 
       {/* Contenido del Timer */}
-      <Box display="flex" flexDirection="column" alignItems="center" marginTop="100px">
-        <Typography variant="h3" marginBottom="20px" color="primary">Temporizador</Typography>
+      <Box display="flex" flexDirection="column" alignItems="center" marginTop="120px">
+        <Typography variant="h3" marginBottom="20px" color="black" sx={{ fontWeight: 'bold' }}>Temporizador</Typography>
 
         <TextField
           label="Tiempo en minutos"
@@ -108,7 +104,7 @@ const Timer = () => {
           sx={StyledTextField}
         />
 
-        <Typography variant="h2" marginBottom="20px" color="secondary">
+        <Typography variant="h2" marginBottom="20px" color="black">
           {`${Math.floor(seconds / 60)}:${seconds % 60 < 10 ? '0' : ''}${seconds % 60}`}
         </Typography>
 
@@ -117,16 +113,34 @@ const Timer = () => {
           color="primary"
           onClick={startTimer}
           disabled={isActive || !inputTime}
-          style={{ marginBottom: '10px', width: '200px' }}
+          sx={{
+            marginBottom: '10px', 
+            width: '250px',
+            fontSize: '18px',
+            backgroundColor: 'black',
+            color: 'white',
+            '&:hover': {
+              backgroundColor: '#333',
+            }
+          }}
         >
           Iniciar
         </Button>
 
         <Button
           variant="outlined"
-          color="secondary"
+          color="primary"
           onClick={resetTimer}
-          style={{ width: '200px' }}
+          sx={{
+            width: '250px', 
+            fontSize: '18px', 
+            borderColor: 'black', 
+            color: 'black',
+            '&:hover': {
+              borderColor: '#333',
+              color: '#333',
+            }
+          }}
         >
           Reiniciar
         </Button>
@@ -136,7 +150,15 @@ const Timer = () => {
             variant="contained"
             color="error"
             onClick={stopAlarm}
-            style={{ marginTop: '10px', width: '200px' }}
+            sx={{
+              marginTop: '10px', 
+              width: '250px', 
+              fontSize: '18px',
+              backgroundColor: 'red',
+              '&:hover': {
+                backgroundColor: '#d32f2f',
+              }
+            }}
           >
             Detener Alarma
           </Button>

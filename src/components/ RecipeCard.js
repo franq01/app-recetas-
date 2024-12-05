@@ -19,6 +19,7 @@ const RecipeCard = ({ recipe, language }) => {
   const [translatedTitle, setTranslatedTitle] = useState(recipe.title);
   const [translatedSummary, setTranslatedSummary] = useState(recipe.summary);
 
+  // Traducción automática del título y el resumen de la receta
   useEffect(() => {
     const translateRecipe = async () => {
       if (language === 'es') {
@@ -38,10 +39,12 @@ const RecipeCard = ({ recipe, language }) => {
     translateRecipe();
   }, [language, recipe]);
 
+  // Navegación al detalle de la receta
   const handleCardClick = () => {
     navigate(`/recipe/${recipe.id}`);
   };
 
+  // Agregar receta a favoritos
   const handleAddToFavorites = async (e) => {
     e.stopPropagation();
     const user = auth.currentUser;
@@ -70,6 +73,26 @@ const RecipeCard = ({ recipe, language }) => {
       }
     } else {
       alert('Por favor inicia sesión para agregar a favoritos.');
+    }
+  };
+
+  // Descargar receta y guardar en localStorage
+  const handleDownload = (e) => {
+    e.stopPropagation();
+    try {
+      const downloads = JSON.parse(localStorage.getItem('downloads')) || [];
+      const alreadyDownloaded = downloads.find((item) => item.id === recipe.id);
+
+      if (!alreadyDownloaded) {
+        downloads.push(recipe);
+        localStorage.setItem('downloads', JSON.stringify(downloads));
+        alert('Receta descargada con éxito.');
+      } else {
+        alert('Esta receta ya está descargada.');
+      }
+    } catch (error) {
+      console.error('Error al descargar la receta:', error);
+      alert('Hubo un problema al descargar la receta.');
     }
   };
 
@@ -158,6 +181,22 @@ const RecipeCard = ({ recipe, language }) => {
           onClick={handleCardClick}
         >
           Ver Detalles
+        </Button>
+        <Button
+          size="small"
+          sx={{
+            textTransform: 'none',
+            fontWeight: 'bold',
+            color: '#000000',
+            backgroundColor: '#ffd700',
+            borderRadius: '8px',
+            '&:hover': {
+              backgroundColor: '#ffc107',
+            },
+          }}
+          onClick={handleDownload}
+        >
+          Descargar
         </Button>
       </CardActions>
     </Card>

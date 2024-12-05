@@ -39,19 +39,31 @@ const RecipeDetails = () => {
     const fetchRecipe = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`https://api.spoonacular.com/recipes/${id}/information?apiKey=${apiKey}`);
-        setRecipe(response.data);
-        setTranslatedTitle(response.data.title);
-        setTranslatedInstructions(response.data.instructions);
+        // Primero busca la receta en "localStorage" (descargas)
+        const storedDownloads = JSON.parse(localStorage.getItem('downloads')) || [];
+        const localRecipe = storedDownloads.find((rec) => rec.id === parseInt(id));
+  
+        if (localRecipe) {
+          setRecipe(localRecipe);
+          setTranslatedTitle(localRecipe.title);
+          setTranslatedInstructions(localRecipe.instructions || '');
+        } else {
+          // Si no está localmente, la busca desde la API
+          const response = await axios.get(`https://api.spoonacular.com/recipes/${id}/information?apiKey=${apiKey}`);
+          setRecipe(response.data);
+          setTranslatedTitle(response.data.title);
+          setTranslatedInstructions(response.data.instructions);
+        }
       } catch (error) {
         console.error('Error fetching recipe details:', error);
       } finally {
         setLoading(false);
       }
     };
-
+  
     fetchRecipe();
   }, [id]);
+  
 
   useEffect(() => {
     const translateRecipeDetails = async () => {

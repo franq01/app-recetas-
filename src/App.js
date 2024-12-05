@@ -7,8 +7,8 @@ import Timer from './components/Timer';
 import Login from './components/Login';
 import RecipeDetails from './components/RecipeDetails'; 
 import SignUp from './components/SignUp'; 
-
-
+import Profile from './components/Profile';
+import Downloads from './components/Downloads';
 const theme = createTheme({
   palette: {
     mode: 'light',
@@ -33,6 +33,8 @@ function App() {
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/timer" element={<Timer />} />
           <Route path="/recipe/:id" element={<RecipeDetails />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/downloads" element={<Downloads />} />
         </Routes>
       </Router>
     </ThemeProvider>
